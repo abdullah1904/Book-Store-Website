@@ -1,6 +1,7 @@
 import { useState,useEffect } from "react";
 import axios from "axios";
 import { useParams } from "react-router-dom";
+import {useAuthContext} from '../hooks/useAuthContext';
 import BackButton from "../components/BackButton";
 import Spinner from "../components/Spinner";
 
@@ -8,9 +9,10 @@ const ShowBook = () => {
     const [book,setBook] = useState({});
     const [loading, setLoading] = useState(false);
     const {id} = useParams();
+    const {user} = useAuthContext();
     useEffect(()=>{
         setLoading(true);
-        axios.get(`http://localhost:8080/books/${id}`)
+        axios.get(`http://localhost:8080/books/${id}`,{headers: {'Authorization': `Bearer ${user.token}`}})
         .then((res)=>{
             setBook(res.data);
             setLoading(false);

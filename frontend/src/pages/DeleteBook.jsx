@@ -4,15 +4,17 @@ import Spinner from '../components/Spinner';
 import axios from "axios";
 import { useNavigate,useParams } from "react-router-dom";
 import { useSnackbar } from 'notistack';
+import { useAuthContext } from "../hooks/useAuthContext";
 
 const DeleteBook = () => {
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
     const {id} = useParams();
     const { enqueueSnackbar } = useSnackbar();
+    const {user} = useAuthContext();
     const handleDeleteBook = ()=>{
         setLoading(true);
-        axios.delete(`http://localhost:8080/books/${id}`)
+        axios.delete(`http://localhost:8080/books/${id}`,{headers: {'Authorization': `Bearer ${user.token}`}})
         .then(()=>{
             setLoading(false);
             enqueueSnackbar('Book Deleted successfully', { variant: 'success' });

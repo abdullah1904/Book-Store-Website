@@ -4,24 +4,31 @@ import axios from "axios";
 import Spinner from "../components/Spinner";
 import { useNavigate,useParams } from "react-router-dom";
 import { useSnackbar } from 'notistack';
+import { useAuthContext } from "../hooks/useAuthContext";
 
 const EditBook = () => {
     const [title, setTitle] = useState("");
     const [author, setAuthor] = useState("");
     const [publishYear, setPublishYear] = useState("");
     const [price, setPrice] = useState("");
+    const [description, setDescription] = useState("");
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
     const {id} = useParams();
     const { enqueueSnackbar } = useSnackbar();
+    const {user} = useAuthContext();
     useEffect(()=>{
+        if(!user){
+            return
+        }
         setLoading(true);
-        axios.get(`http://localhost:8080/books/${id}`)
+        axios.get(`http://localhost:8080/books/${id}`,{headers: {'Authorization': `Bearer ${user.token}`}})
         .then((res)=>{
             setTitle(res.data.title);
             setAuthor(res.data.author);
             setPublishYear(res.data.publishYear);
             setPrice(res.data.price);
+            setDescription(res.data.description);
             setLoading(false);
         })
         .catch((error)=>{
@@ -31,14 +38,18 @@ const EditBook = () => {
         })
     },[]);
     const handleEditBook = ()=>{
+        if(!user){
+            return
+        }
         const data = {
             title,
             author,
             publishYear,
             price,
+            description,
         };
         setLoading(true);
-        axios.put(`http://localhost:8080/books/${id}`,data)
+        axios.put(`http://localhost:8080/books/${id}`,data,{headers: {'Authorization': `Bearer ${user.token}`}})
         .then(()=>{
             setLoading(false);
             enqueueSnackbar('Book Edited successfully', { variant: 'success' });
@@ -46,7 +57,7 @@ const EditBook = () => {
         })
         .catch((error)=>{
             setLoading(false);
-            enqueueSnackbar('Error', { variant: 'error' });
+            enqueueSnackbar("Error", { variant: 'error' });
             console.log(error);
         })
     };
@@ -71,6 +82,10 @@ const EditBook = () => {
                 <div className="my-4 ">
                     <label className="text-xl mr-4 text-gray-500">Price</label>
                     <input type="number" value={price} onChange={(e)=>setPrice(e.target.value)} className="border-2 border-gray-500 px-4 py-2 w-full" />
+                </div>
+                <div className="my-4 ">
+                    <label className="text-xl mr-4 text-gray-500">Description</label>
+                    <input type="text" value={description} onChange={(e)=>setDescription(e.target.value)} className="border-2 border-gray-500 px-4 py-2 w-full" />
                 </div>
                 <button className="p-2 bg-sky-300 m-8" onClick={handleEditBook}>Save</button>
             </div>

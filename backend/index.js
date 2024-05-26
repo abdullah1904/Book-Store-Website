@@ -1,7 +1,8 @@
-import express, { response } from "express";
+import express from "express";
 import mongoose from "mongoose";
 import { PORT, mongoDBURL } from "./config.js";
-import bookRoute from "./routes/booksRoute.js";
+import bookRoutes from "./routes/booksRoute.js";
+import userRoutes from "./routes/userRoute.js";
 import cors from "cors";
 
 const app = express();
@@ -19,7 +20,13 @@ app.get("/",(req,res)=>{
     return res.status(234).send("Welcome to first MERN Project");
 });
 
-app.use('/books',bookRoute);
+app.use((req,res,next)=>{
+    console.log(req.path,req.method);
+    next();
+});
+
+app.use('/books',bookRoutes);
+app.use('/user',userRoutes);
 
 mongoose.connect(mongoDBURL)
     .then(()=>{

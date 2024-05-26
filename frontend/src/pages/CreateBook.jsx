@@ -4,24 +4,32 @@ import axios from "axios";
 import Spinner from "../components/Spinner";
 import { useNavigate } from "react-router-dom";
 import { useSnackbar } from 'notistack';
+import { useAuthContext } from "../hooks/useAuthContext";
 
 const CreateBook = () => {
     const [title, setTitle] = useState("");
     const [author, setAuthor] = useState("");
     const [publishYear, setPublishYear] = useState("");
     const [price, setPrice] = useState("");
+    const [description, setDescription] = useState("");
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
     const { enqueueSnackbar } = useSnackbar();
+    const {user} = useAuthContext();
     const handleSaveBook = ()=>{
+        if(!user){
+            enqueueSnackbar('You must be loggedIn', { variant: 'error' });
+            return 
+        }
         const data = {
             title,
             author,
             publishYear,
             price,
+            description,
         };
         setLoading(true);
-        axios.post('http://localhost:8080/books',data)
+        axios.post('http://localhost:8080/books',data,{headers: {'Authorization': `Bearer ${user.token}`}})
         .then(()=>{
             setLoading(false);
             enqueueSnackbar('Book Created successfully', { variant: 'success' });
@@ -54,6 +62,10 @@ const CreateBook = () => {
                 <div className="my-4 ">
                     <label className="text-xl mr-4 text-gray-500">Price</label>
                     <input type="number" value={price} onChange={(e)=>setPrice(e.target.value)} className="border-2 border-gray-500 px-4 py-2 w-full" />
+                </div>
+                <div className="my-4 ">
+                    <label className="text-xl mr-4 text-gray-500">Description</label>
+                    <input type="text" value={description} onChange={(e)=>setDescription(e.target.value)} className="border-2 border-gray-500 px-4 py-2 w-full" />
                 </div>
                 <button className="p-2 bg-sky-300 m-8" onClick={handleSaveBook}>Save</button>
             </div>
